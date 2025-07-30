@@ -25,7 +25,7 @@ The system combines the following components:
 ### 1. **Clone the repo**
 
 ```bash
-git clone image-to-ocr-app
+git clone https://github.com/anoopkarnik/image-to-ocr-app.git
 cd image-to-ocr-app
 ```
 
