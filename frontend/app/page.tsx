@@ -7,7 +7,7 @@ import { imageToGoogleSheetWorkflow } from "@/actions/n8n";
 export default function Home() {
   const [currency, setCurrency] = useState("USD");
   const [image, setImage] = useState<File | null>(null);
-  const [webhookUrl, setWebhookUrl] = useState(process.env.N8N_WEBHOOK_URL!);
+  const [webhookUrl, setWebhookUrl] = useState(process.env.N8N_WEBHOOK_URL2!);
 
 
   const handleSubmit = async (e: React.FormEvent) => {

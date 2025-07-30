@@ -4,7 +4,7 @@ export const imageToGoogleSheetWorkflow = async (image: File, currency: string, 
     const formData = new FormData();
     formData.append("image", image);
     formData.append("currency", currency);
-    let url = webhookUrl || process.env.N8N_WEBHOOK_URL;
+    let url = webhookUrl || process.env.N8N_WEBHOOK_URL2;
     const response = await fetch(url + "webhook/ocr-sheet-workflow", {
       method: "POST",
       body: formData,
