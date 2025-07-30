@@ -19,16 +19,6 @@ The system combines the following components:
 
 ---
 
-## 🛠️ Project Structure
-
-.
-├── docker-compose.yml
-├── ocr-api/
-├── frontend/
-
-
----
-
 ## 🚀 Getting Started
 
 
