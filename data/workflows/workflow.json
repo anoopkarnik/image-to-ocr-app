@@ -1,0 +1,323 @@
+{
+  "name": "Paddle Ocr Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ocr-api:8000/ocr/",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "07ab2b2d-1cf8-4d5e-90ea-ff356180deb8",
+      "name": "Get OCR"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Text: {{ $json.table }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=## 🧠 System Prompt — FX Forward Rate Extractor\n\nYou are an expert in parsing financial documents, especially OCR-extracted text that contains currency forward data tables.\n\nYour job is to extract a list of FX forward entries in **structured JSON format**. Each entry must contain the following keys:\n\n- `\"T\"`: The forward term (e.g., ON, TN, 1W, 1M, 3M, etc.)\n- `\"Days\"`: Number of days (can be empty string `\"\"` if not present)\n- `\"Dates\"`: The associated MM/DD/YY date (or similar format like 07/25/25)\n- `\"Pts Bid\"`: The bid points value\n- `\"Pts Ask\"`: The ask points value\n- `\"Forwards Mid\"`: The forward mid value\n\n---\n\n### 🧾 Guidelines\n\n- Ignore unrelated content like top bars, buttons, headers, or footers.\n- The data may appear as a sequence of rows like this:\n\nON | 07/24/25 | 0.758 | 0.778 | 1.1723962\nTN | 07/25/25 | 0.765 | 0.775 | 1.1724730\nSP | 07/25/25 | 1.1725 | 1.1726 | 1.17255\n1W | 7 | 08/01/25 | 5.47 | 5.50 | 1.173099\n\n- Some rows may have a missing `Days` field (e.g. \"SP\" just has the date). That’s fine — just leave `\"Days\": \"\"`.\n\n---\n\n### ✅ Output Format\n\nReturn a **JSON array** like this:\n\n```json\n[\n  {\n    \"T\": \"ON\",\n    \"Days\": \"\",\n    \"Dates\": \"07/24/25\",\n    \"Pts Bid\": \"0.758\",\n    \"Pts Ask\": \"0.778\",\n    \"Forwards Mid\": \"1.1723962\"\n  },\n  {\n    \"T\": \"1W\",\n    \"Days\": \"7\",\n    \"Dates\": \"08/01/25\",\n    \"Pts Bid\": \"5.47\",\n    \"Pts Ask\": \"5.50\",\n    \"Forwards Mid\": \"1.173099\"\n  }\n]\n\n## Final Notes\n\nBe resilient to OCR noise such as:\n\n    Misspelled headers\n\n    Inconsistent spacing\n\n    Newlines mid-row\n\nUse best-effort pattern matching to extract only valid FX forward rows.\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "af4c1baf-3b62-450e-8e1f-ec2296a7209a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"T\": \"ON\",\n    \"Days\": \"\",\n    \"Dates\": \"07/24/25\",\n    \"Pts Bid\": \"0.758\",\n    \"Pts Ask\": \"0.778\",\n    \"Forwards Mid\": \"1.1723962\"\n  },\n  {\n    \"T\": \"1W\",\n    \"Days\": \"7\",\n    \"Dates\": \"08/01/25\",\n    \"Pts Bid\": \"5.47\",\n    \"Pts Ask\": \"5.50\",\n    \"Forwards Mid\": \"1.173099\"\n  }\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        208
+      ],
+      "id": "813053ac-1154-4906-a037-8fe1f94479ad",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "13ukoHmX-3NoTQ_NaFlfPqvDENRep8gmcMOVTxyd5X2k",
+          "mode": "list",
+          "cachedResultName": "Financial Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13ukoHmX-3NoTQ_NaFlfPqvDENRep8gmcMOVTxyd5X2k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13ukoHmX-3NoTQ_NaFlfPqvDENRep8gmcMOVTxyd5X2k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "T": "={{ $json.T }}",
+            "Days ": "={{ $json.Days }}",
+            "Dates": "={{ $json.Dates }}",
+            "Pts Bid": "={{ $json['Pts Bid'] }}",
+            "Average": "={{ $json['Pts Bid']/2 + $json['Pts Ask']/2 }}",
+            "Pts Ask ": "={{ $json['Pts Ask'] }}",
+            "Forwards Mid": "={{ $json['Forwards Mid'] }}",
+            "ID": "={{$('Webhook').item.json.body.currency+\"_\"+ $json.T }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "T",
+              "displayName": "T",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Days ",
+              "displayName": "Days ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dates",
+              "displayName": "Dates",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Pts Bid",
+              "displayName": "Pts Bid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Pts Ask ",
+              "displayName": "Pts Ask ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Forwards Mid",
+              "displayName": "Forwards Mid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Average",
+              "displayName": "Average",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        976,
+        0
+      ],
+      "id": "fb0bf6de-6ded-4125-96e0-0f285c652a81",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uy51C7JjWwCoFSMJ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "ec59c574-5a6d-4255-9040-e47697dafb0e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ocr-sheet-workflow",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "991eece8-5849-4248-8c77-eb85646d6f97",
+      "name": "Webhook",
+      "webhookId": "e4057c10-8a12-4005-8db9-78801ba55174"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        208
+      ],
+      "id": "8fb3e3f2-5052-4c21-80c1-fe3b24a07811",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "XRuXkSB2mk3HQo6w",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get OCR": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2e3d660f-c74d-4ea1-946c-8a0bfc73a08e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "Lnr76BOi0ldUt8Pq",
+  "tags": []
+}

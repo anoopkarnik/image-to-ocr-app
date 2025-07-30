@@ -1,0 +1,44 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Jupyter and IPython
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Logs & temp files
+*.log
+*.tmp
+*.swp
+*.bak
+
+# Compiled files
+*.so
+*.pyd
+
+# Test and result files
+tests/
+*.test.py
+*.jpg
+*.png
+*.pdf
+*.json
+result*/
+temp_ocr/
+
+# Docker-specific
+Dockerfile~
+docker-compose.override.yml

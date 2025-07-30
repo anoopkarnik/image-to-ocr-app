@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+paddleocr
+paddlepaddle
+python-multipart
+pillow
+opencv-python-headless
+numpy
