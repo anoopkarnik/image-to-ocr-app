@@ -17,6 +17,10 @@ ocr = PaddleOCR(
 def get_center_y(box): return sum([pt[1] for pt in box]) / len(box)
 def get_center_x(box): return sum([pt[0] for pt in box]) / len(box)
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 @app.post("/ocr/")
 async def ocr_endpoint(file: UploadFile = File(...)):
     # Save uploaded image temporarily
