@@ -72,21 +72,22 @@ export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
     <div className="w-full h-full flex items-center justify-center">
       <div
         ref={dropRef}
-        {...getRootProps()}
+        {...(preview ? {} : getRootProps())} // Only apply dropzone props if no preview
         className={`
           w-full h-64 max-w-4xl
-          border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
+          border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all relative
           ${isDragActive ? "border-primary bg-muted" : "border-border bg-background"}
           flex items-center justify-center
         `}
       >
-        <input {...getInputProps()} />
+        {!preview && <input {...getInputProps()} />}
         {uploading ? (
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="animate-spin w-4 h-4" />
             Uploading...
           </div>
         ) : preview ? (
+        <>
           <Image
             src={preview}
             alt="Preview"
@@ -94,8 +95,21 @@ export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
             height={1000}
             className="rounded-md object-cover max-h-48"
           />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setPreview(null);
+              onChange && onChange(null as any); // force parent to clear
+            }}
+            className="absolute top-2 right-2 bg-red-400 text-white rounded-full px-1 text-xs cursor-pointer
+             hover:bg-red-700 transition z-50"
+          >
+            ✕
+          </button>
+        </>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center">
             Drag & drop, click to upload, or paste an image
           </p>
         )}
