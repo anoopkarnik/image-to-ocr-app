@@ -7,7 +7,7 @@ import Image from "next/image";
 
 type ImageUploadProps = {
   onChange: (file: File) => void;
-  value: string;
+  value: string | null;
 };
 
 export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
@@ -45,7 +45,7 @@ export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
       const file = acceptedFiles[0];
       if (file) await handleFile(file);
     },
-    [onChange]
+    [onChange,handleFile]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -66,17 +66,17 @@ export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
 
     window.addEventListener("paste", handlePaste);
     return () => window.removeEventListener("paste", handlePaste);
-  }, []);
+  }, [handleFile]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center b">
       <div
         ref={dropRef}
         {...(preview ? {} : getRootProps())} // Only apply dropzone props if no preview
         className={`
           w-full h-64 max-w-4xl
           border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all relative
-          ${isDragActive ? "border-primary bg-muted" : "border-border bg-background"}
+          ${isDragActive ? "border-white/30" : "border-white/50 bg-black"}
           flex items-center justify-center
         `}
       >
@@ -89,7 +89,7 @@ export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
         ) : preview ? (
         <>
           <Image
-            src={preview}
+            src={preview} 
             alt="Preview"
             width={1000}
             height={1000}
