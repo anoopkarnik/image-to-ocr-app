@@ -31,11 +31,11 @@ export default function Home() {
     await imageToGoogleSheetWorkflow(image, currency, webhookUrl);
 
     await waitFor(60000);
-    setLoading(false);
     toast("The workflow has completed", {
         description: "Please check your Google Sheet for the results",
       })
-
+    await waitFor(60000);
+    setLoading(false);
   };
 
   return (
