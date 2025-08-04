@@ -16,15 +16,8 @@ WORKDIR /app
 
 # 📦 Copy and install dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
-
-# 🚀 Preload PaddleOCR model during image build
-COPY preload_model.py .
-RUN python preload_model.py
-
-# 🧠 Copy the main app
 COPY main.py .
-
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # 🌍 Expose the FastAPI default port
 EXPOSE 8000

@@ -1,10 +1,11 @@
 "use server"
-export const imageToGoogleSheetWorkflow = async (image: File, currency: string, webhookUrl?: string) => {
+export const imageToGoogleSheetWorkflow = async (type: string,image: File, currency: string) => {
   try {
     const formData = new FormData();
+    formData.append("type", type);
     formData.append("image", image);
     formData.append("currency", currency);
-    let url = webhookUrl || process.env.N8N_WEBHOOK_URL2;
+    let url = process.env.N8N_WEBHOOK_URL2;
     const response = await fetch(url + "webhook/ocr-sheet-workflow", {
       method: "POST",
       body: formData,

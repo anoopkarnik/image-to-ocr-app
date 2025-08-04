@@ -7,7 +7,7 @@ import Image from "next/image";
 
 type ImageUploadProps = {
   onChange: (file: File) => void;
-  value: string | null;
+  value: File | null;
 };
 
 export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
@@ -16,9 +16,6 @@ export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
   const [error, setError] = useState<string | null>(null);
   const dropRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (value) setPreview(value);
-  }, [value]);
 
   const handleFile = async (file: File) => {
     setPreview(URL.createObjectURL(file));
@@ -75,8 +72,7 @@ export const ImageUploader = ({ value, onChange }: ImageUploadProps) => {
         {...(preview ? {} : getRootProps())} // Only apply dropzone props if no preview
         className={`
           w-full h-64 max-w-4xl
-          border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all relative
-          ${isDragActive ? "border-white/30" : "border-white/50 bg-black"}
+          border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all relative bg-accent
           flex items-center justify-center
         `}
       >

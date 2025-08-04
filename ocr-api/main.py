@@ -6,13 +6,7 @@ import cv2
 
 app = FastAPI()
 
-ocr = PaddleOCR(
-    use_doc_orientation_classify=False,
-    use_doc_unwarping=False,
-    use_textline_orientation=False,
-    det_db_box_thresh=0.6,
-    det_db_unclip_ratio=1
-)
+
 
 def get_center_y(box): return sum([pt[1] for pt in box]) / len(box)
 def get_center_x(box): return sum([pt[0] for pt in box]) / len(box)
@@ -22,9 +16,18 @@ def health_check():
     return {"status": "healthy"}
 
 @app.post("/ocr/")
-async def ocr_endpoint(file: UploadFile = File(...)):
+async def ocr_endpoint(file: UploadFile = File(...), box_thresh: float = 0.6, unclip_ratio: float = 1, 
+                       convert_to_gray: bool = True):
     # Save uploaded image temporarily
-    folder = "temp_ocr/"
+
+    ocr = PaddleOCR(
+        use_doc_orientation_classify=False,
+        use_doc_unwarping=False,
+        use_textline_orientation=False,
+        det_db_box_thresh=box_thresh,
+        det_db_unclip_ratio=unclip_ratio
+    )
+    folder = "tmp/"
     os.makedirs(folder, exist_ok=True)
     image_path = os.path.join(folder, file.filename)
     output_json_path = image_path.split('.')[0]+'_res.json'
@@ -33,11 +36,12 @@ async def ocr_endpoint(file: UploadFile = File(...)):
         content = await file.read()
         f.write(content)
 
-    img = cv2.imread(image_path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    inverted_binary = cv2.bitwise_not(binary)
-    cv2.imwrite(image_path, inverted_binary)
+    if convert_to_gray:
+        img = cv2.imread(image_path)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        inverted_binary = cv2.bitwise_not(binary)
+        cv2.imwrite(image_path, inverted_binary)
 
     # Run OCR
     result = ocr.predict(image_path)[0]
